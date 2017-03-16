@@ -10,3 +10,4 @@ Release/
 *.sdf
 main.cpp
 dirent.h
+*.db

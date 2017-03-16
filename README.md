@@ -1,149 +1,97 @@
 # CTML
 
-CTML is a C++ HTML document constructor, that was designed to be simple to use and implement. Has no dependencies on any other projects, only the C++ standard library.
+CTML is a C++ HTML document constructor, that was designed to be simple to use and implement.
+Has no dependencies on any other projects, only the C++ standard library.
 
-# Including
+## About Version 1.0.0
 
-To use CTML in your project, just point your compiler to the folder containing the `CTML.h`, `Document.h`, and `Node.h` files. Once you are done with that, just do `#include "CTML.h"` on the files where you use CTML, and voila, you're done.
+This version of CTML is a complete rewrite of the library, with the API of this version being incompatible with the last.
+As of now, all commits to this version are being done in a seperate `v1` branch.
+Additionally, all commits will be tagged with a `1.0.0` tag, to signify that this is the first real version.
 
-# Usage
+###### Why 1.0.0?
 
-###### Including the Classes 
+Though, the first official released version was the one currently in `master`, I feel it is out of date and cluttered.
+The version in `master` is clunky, hard to maintain, and overall a nightmare in my mind.
+Also, that version was never actually properly versioned, and thus there was never an actual `1.0.0`.
+With that, this will be, in my mind, the first real release of CTML.
 
-To get all of the classes provided in CTML just use, `#include "CTML.h"`.
+## Concepts
 
-###### Namespacing
+CTML 1.0.0 brings a couple of concepts to the table, in effort to improve the library.
 
-Everything in CTML is namespaced with `CTML`. So for example, the `Node` class would be under `CTML::Node`.
+###### Node Lists
 
-###### Documents
+For each node in CTML 1.0.0+, children will be represented with a new `NodeList` class.
+Previously, all child nodes were represented by a `std::vector` that took `Node`.
+This `NodeList` class, while being similar to a `std::vector`, will contain methods specific to interacting with HTML nodes.
 
-CTML provides a class for creating a simple HTML document, which is `CTML::Document`.
+As an example, for iteration through a `NodeList`, there will be a `ForEach` method, used like the below code.
 
-This creates a document with a head, and body tag. As well as a DOCTYPE tag.
+    NodeList.ForEach([] (size_t index, Node node) {
+        if (!node.HasClass("button"))
+            return;
 
-The Document includes two methods for getting to a string. `CTML::Document::ToString(bool)` and `CTML::Document::ToTree()``.
+        node.SetAttribute("style", "background-color: red;");
+    });
 
-There is only one argument in `CTML::Document::ToString(CTML::Readability)`, the `readability` parameter is an enum defined in `Node.h`, which currently can be equal to, `SINGLE_LINE`, `MULTILINE`, or `MULTILINE_BR`. This only determines how the string should be formatted.
+This method allows for a cleaner style of iteration through a collection of `Node` classes.
+But, that is not the only thing that the `NodeList` will contain.
+To introduce what this new container will support, the next concept will be introduced.
 
-`CTML::Document::ToTree()` returns the document as a tree view that reflects the nesting of the actual document.
+###### Selector Support
 
-A simple example that returns the document as a string to the console is below.
+Pre-1.0.0 CTML supported selectors when instantiating a `Node`, but not for traversing `Node` instances.
+Additionally, the selectors supported were relatively barebones, only supporting tag name, classes, and one ID.
+To expand on selectors and use them more efficiently, a Selector parser will be introduced.
 
-```cpp
-#include "CTML.h"
-#include <iostream>
+The selector parser will take in a selector string, and of course parse it, creating a parse tree for the selector.
+This parse tree can then be used to grab `Node` instances from a `NodeList`, or to create a new `Node`.
+An example of using the parse tree for a selector is shown below (not final code).
 
-int main ()
-{
-    CTML::Document document;
-    std::cout << document.ToString(CTML::Readability::MULTILINE);
-}
-```
+    SelectorNode selector = SelectorParser::Parse("a.button span.bold");
+    NodeList     nodes    = NodeList.Select(selector);
 
-The result of running this program in the console is below.
+After the `Select` method runs, it returns a `NodeList` containing each node that was found in the search.
+Be careful though, the `Select` method only runs relative to the `Node` instances within, so if you want to search a document, search from the root.
+As stated earlier, you would also be able to use the selector parse tree to create `Node` instances.
+This is demonstrated below.
 
-```
-<!DOCTYPE html>
-<html>
-    <head>
-    </head>
-    <body>
-    </body>
-</html>
-```
+    SelectorNode selector = SelectorParser::Parse("a.button span.bold");
+    Node         button(selector);
 
-There is also the `CTML::Document::WriteToFile(std::string, CTML::Readability)` method, which opens a stream to `filePath` and outputs the document string to the stream. The second argument, `readability` is an enum defined in `Node.h`, which currently can be equal to, `SINGLE_LINE`, `MULTILINE`, or `MULTILINE_BR`. This only determines how the file should be output.
+This would then create a Node that, when given as a string, looks like the following.
 
-Below is an example of `CTML::Document::WriteToFile(std::string, CTML::Readability)`.
+    <a class="button">
+        <span class="bold">
+        </span>
+    </a>
 
-```cpp
-#include "CTML.h"
+This new selector support is more powerful, and, when used correctly, should allow for time to be cut down when writing code using CTML.
 
-int main()
-{
-    CTML::Document doc;
-    doc.AddNodeToBody(CTML::Node("a.link").SetContent("Anchor").SetAttribute("href", "http://www.example.com"));
-    return doc.WriteToFile("index.html", CTML::Readability::MULTILINE);
-}
-```
 
-Which saves the document to the `index.html` file next to the executable, with the output of this.
+###### New Node Representation
 
-```html
-<!DOCTYPE html>
-<html>
-    <head>
-    </head>
-    <body>
-        <a class="link" href="http://www.example.com">
-            Anchor
-        </a>
-    </body>
-</html>
-```
+`Node` instances previously contained a `m_type` parameter, used to determine how the `Node` should be interpreted.
+While, this works for a limited amount of `Node` instances, this breaks down upon having custom `Node` representations, among other things.
+I have decided that, to allow for new `Node` types in an efficient way, and without cluttering the main `Node` class with edge cases, `Node` will be easier to extend from.
+The primary `Node` class will be used for most purposes, including as a root container.
+But for something such as a document type, a `DocumentTypeNode` would be used, which inherits from `Node`, and contains the usual `ToString`, and other methods.
 
-###### Nodes
+Though, since some nodes in HTML do not allow for say, class attributes, or content, `Node` will contain a few protected boolean flags, so when you inherit, you can set them.
+For example, the flags for a `DocumentTypeNode` may look like the code below.
 
-Along with the `CTML::Document` class, CTML provides a `CTML::Node` class. `CTML::Node` is the basis of all element representation in CTML.
+    bool m_allowChildren   = false;
+    bool m_allowAttributes = false;
+    bool m_closeTag        = false;
 
-`CTML::Node` contains eight methods for manipulation of a current node. Almost all of these methods are chainable.
+And so on, and so forth.
 
-There are two methods for getting a string from `CTML::Node`. The first of which is `CTML::Node::ToString(CTML::Readability, int)`, which returns the current node and all of its children as a string representing each element. The parameter, `readability` is an enum defined in `Node.h`, which currently can be equal to, `SINGLE_LINE`, `MULTILINE`, or `MULTILINE_BR`. This only determines how the string should be formatted. The `indentLevel` parameter is used to determine how many four space blocks the children of each element be indented by, this only is used if `readability` is either `MULTILINE` or `MULTILINE_BR`.
+## Backwards Compatibility
 
-The other method is `CTML:::Node:GetTreeString(int)`, which returns the current node and it's children as a tree view. The `indentLevel` parameter is an integer representing how many indents (four spaces each) should be used in representing the nesting of the nodes.
+As, most of these changes require new classes, as well as entire rewrites, there is no backwards compatibility with pre-1.0.0.
+Keep that in mind when considering to upgrade to 1.0.0.
 
-**Note all of the methods below are chainable**
+## License
 
-The `CTML::Node::SetName(std::string)` method sets the current name of the Node, such as div, span, e.t.c. You can also add classes to the name. For example, if you type `div.container.fluid` as the name, `CTML::Node::ToString(CTML::Readability::SINGLE_LINE, 0)` would return `<div class="container fluid"></div>`
-
-The `CTML::Node::SetAttribute(std::string, std::string)` method sets an attribute determined by the `name` parameter to the `value` parameter. For example, `CTML::Node::SetAttribute("href", "#test")` would set the node's href attribute to `test`
-
-The `CTML::Node::SetType(CTML::NodeType)` method sets the current type of the node, can be either `ELEMENT` or `DOCUMENT_TYPE`.
-
-The `CTML::Node::SetContent(std::string)` method sets the current text content of the node, this is always outputted in the beginning of the node, before the children, unless the node type is `DOCUMENT_TYPE` in which then it is right after the `!DOCTYPE ` string.
-
-The `CTML::Node::ToggleClass(std::string)` method either adds or removes a class from an element, depending on if the class is already on the element.
-
-The `CTML::Node::AppendChild(CTML::Node)` method adds a node to this node as a child.
-
-Below is an example of a document with a div in the body, with an a tag as the child.
-
-```cpp
-#include "CTML.h"
-
-int main()
-{
-    CTML::Document doc;
-    doc.AddNodeToBody(CTML::Node("a.link").SetContent("Anchor").SetAttribute("href", "http://www.example.com"));
-    std::cout << doc.ToString(CTML::Readability::MULTILINE);
-    return 0;
-}
-```
-
-Which returns the following in the console...
-
-```
-<!DOCTYPE html>
-<html>
-    <head>
-    </head>
-    <body>
-        <a class="link" href="http://www.example.com">
-            Anchor
-        </a>
-    </body>
-</html>
-```
-
-# Tests
-
-Tests can be found, as well as added to the `tests.cpp` file, if you'd like to run the tests, just compile that file in your compiler, and run the executable that has been created.
-
-# Credits
-
-[Tinfoilboy - Project Creator](https://github.com/tinfoilboy)
-
-# License
-
-This project (CTML) is licensed under the MIT License, the terms can be seen [here](https://github.com/tinfoilboy/CTML/blob/master/LICENSE).
+The license for CTML is the same as before, MIT License.
