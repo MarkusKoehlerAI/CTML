@@ -87,6 +87,12 @@ For example, the flags for a `DocumentTypeNode` may look like the code below.
 
 And so on, and so forth.
 
+## Tracker for Current Version
+
+Currently, to track my progress on this version (and hopefully other subsequent versions), I use Trello.
+I've only used Trello privately, and I like it a lot.
+You can find the board [right here](https://trello.com/b/NvpPLQ6w/ctml).
+
 ## Backwards Compatibility
 
 As, most of these changes require new classes, as well as entire rewrites, there is no backwards compatibility with pre-1.0.0.
