@@ -21,7 +21,7 @@ const std::string boolean_to_string(bool value)
 }
 
 /**
- Test the ability to add a node to the
+ Test the ability to add nodes to the
  NodeList.
 
  Fails if the NodeList's Count method
@@ -31,12 +31,11 @@ void run_node_list_add_test()
 {
 	std::cout << "Running NodeList Add Test..." << std::endl;
 
-	const size_t expectedCount = 1;
+	const size_t expectedCount = 3;
 
-	Node node;
 	NodeList list;
 
-	list.Add(node);
+	list.Add(Node()).Add(Node()).Add(Node());
 
 	const size_t count = list.Count();
 
@@ -56,7 +55,7 @@ void run_node_list_remove_test()
 {
 	std::cout << "Running NodeList Remove Test..." << std::endl;
 
-	NodeList list;
+	NodeList list(3);
 
 	list.Add(Node()).Add(Node()).Add(Node());
 
@@ -84,7 +83,7 @@ void run_node_for_each()
 {
 	std::cout << "Running NodeList ForEach Test..." << std::endl;
 
-	NodeList list;
+	NodeList list(3);
 
 	list.Add(Node()).Add(Node()).Add(Node());
 
