@@ -108,7 +108,6 @@ This would then create a Node that, when given as a string, looks like the follo
 
 This new selector support is more powerful, and, when used correctly, should allow for time to be cut down when writing code using CTML.
 
-
 ###### New Node Representation
 
 `Node` instances previously contained a `m_type` parameter, used to determine how the `Node` should be interpreted.
