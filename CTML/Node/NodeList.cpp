@@ -19,7 +19,7 @@ NodeList::~NodeList()
 {
 	delete[] m_nodes;
 
-	m_count = 0;
+	m_count    = 0;
 	m_capacity = 0;
 }
 
@@ -53,13 +53,13 @@ NodeList& NodeList::Remove(const size_t item)
 	return *this;
 }
 
-void NodeList::ForEach(const ForEachCallback& callback)
+void NodeList::ForEach(const std::function<void(const size_t, const Node&)> callback)
 {
 	if (m_count == 0)
 		return;
 
 	for (size_t index = 0; index < m_count; index++)
-		callback(index, &m_nodes[index]);
+		callback(index, m_nodes[index]);
 }
 
 void NodeList::_ResizeArray(const ptrdiff_t resizedCapacity)

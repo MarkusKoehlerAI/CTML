@@ -4,8 +4,6 @@ namespace CTML
 {
 	class Node;
 
-	typedef void(*ForEachCallback)(size_t, Node*);
-
 	/**
 	 A container representing a list of Node instances.
 	 
@@ -61,7 +59,7 @@ namespace CTML
 		 the callback method passed in until there are
 		 no more nodes to iterate through.
 		 */
-		void ForEach(const ForEachCallback& callback);
+		void ForEach(const std::function<void(const size_t, const Node&)> callback);
 
 		/**
 		 Grab the amount of Nodes in the NodeList.
