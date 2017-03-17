@@ -5,9 +5,6 @@
 
 using namespace CTML;
 
-/**
-Construct a NodeList of the specified size.
-*/
 NodeList::NodeList(const size_t capacity)
 	:
 	m_capacity(capacity)
