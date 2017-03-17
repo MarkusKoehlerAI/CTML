@@ -16,6 +16,45 @@ The version in `master` is clunky, hard to maintain, and overall a nightmare in 
 Also, that version was never actually properly versioned, and thus there was never an actual `1.0.0`.
 With that, this will be, in my mind, the first real release of CTML.
 
+## Type of Library
+
+Previously, CTML was a header-only library.
+This was fine when the library was tiny and didn't have much complexity.
+But, in thinking of the future of the library, I've decided to ditch that effort.
+
+While, header-only is much easier to include and use, there are a number of factors that make me want to get away from that.
+
+###### Compile Times
+
+In adding more features, new files and code of course, have to be added.
+This, in turn, requires higher compile times overall when writing your project as you have to also recompile the library.
+
+With a single compiled library, you only have to link to it.
+Thus, making compile times faster.
+Think a Raspberry Pi, or similar, it would take an astronomical amount of time to compile for a platform such as that each modification of your project.
+
+###### Organization
+
+One of the big problems with a header-only library is the organization.
+All of your code gets stuck into one monolithic file, which makes it harder to read, and harder to maintain as a result, in my mind.
+
+###### Include Cleanliness
+
+In a header-only library, your includes get cluttered by things you may not need.
+As an example, NodeLists contain optional selector support, maybe you don't need to use a selector.
+But, in a header-only library, the selector code is also included and compiled.
+Instead of having that, I'd rather keep the project using the library clean.
+
+###### Templateless
+
+A header-only library makes sense when using a lot of templates, which are only able to be written in header files.
+This library does not use templates, as it does not have a need to.
+
+You may think that, having a non header-only library is complicated to include and use, and I do feel your pain.
+But, for this project, I will keep up-to-date information on including and compiling the library on a number of platforms (at the very least, Linux and Windows with Visual Studio).
+
+I feel as if this change, while straying away from one of the mainstays of the library, will be a beneficial one in the long run.
+
 ## Concepts
 
 CTML 1.0.0 brings a couple of concepts to the table, in effort to improve the library.
