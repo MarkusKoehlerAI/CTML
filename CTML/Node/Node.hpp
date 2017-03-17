@@ -8,14 +8,6 @@ namespace CTML
 	class Node
 	{
 	public:
-		Node()
-		{
-		}
-
-		~Node()
-		{
-		}
-
 	private:
 		/**
 		 Determines whether the node is
